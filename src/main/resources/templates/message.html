@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base::layout(~{::section})}">
+<head>
+<meta charset="UTF-8">
+<title>Notification - EcomStore</title>
+</head>
+<body>
+	<section class="py-5 my-5">
+		<div class="container">
+			<div class="row justify-content-center">
+				<div class="col-lg-6 text-center">
+					<div class="card-modern shadow-lg p-5">
+						<div class="rounded-circle bg-primary bg-opacity-10 text-primary d-inline-flex p-4 fs-1 mb-3">
+							<i class="fa-solid fa-bell"></i>
+						</div>
+						<h3 class="fw-bold mb-3">[[${msg}]]</h3>
+						<div class="mt-4">
+							<a href="/signin" class="btn btn-accent px-4 py-2.5">
+								<i class="fa-solid fa-right-to-bracket me-1"></i> Proceed to Login
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</body>
+</html>

@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base::layout(~{::section})}">
+<head>
+<meta charset="UTF-8">
+<title>My Orders - EcomStore</title>
+</head>
+<body>
+	<section class="py-4">
+		<div class="container">
+			<div class="card-custom p-4">
+				<div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
+					<div>
+						<h3 class="fw-bold text-dark mb-0"><i class="fa-solid fa-boxes-packing me-2 text-primary"></i> Order History</h3>
+						<span class="text-muted small">Track and manage your placed orders</span>
+					</div>
+					<span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-3 py-1.5 rounded-pill">
+						[[${orders!=null ? orders.size() : 0}]] Orders
+					</span>
+				</div>
+
+				<div th:if="${session.succMsg}" class="alert alert-success alert-dismissible fade show rounded-3 mb-3" role="alert">
+					<i class="fa-solid fa-circle-check me-2"></i> [[${session.succMsg}]]
+					<th:block th:text="${@commnServiceImpl.removeSessionMessage()}"></th:block>
+				</div>
+
+				<div th:if="${session.errorMsg}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-3" role="alert">
+					<i class="fa-solid fa-circle-xmark me-2"></i> [[${session.errorMsg}]]
+					<th:block th:text="${@commnServiceImpl.removeSessionMessage()}"></th:block>
+				</div>
+
+				<th:block th:if="${orders != null and !orders.empty}">
+					<div class="table-responsive">
+						<table class="table table-custom align-middle">
+							<thead>
+								<tr>
+									<th scope="col">Order ID</th>
+									<th scope="col">Date</th>
+									<th scope="col">Purchased Item</th>
+									<th scope="col">Total Price</th>
+									<th scope="col">Status</th>
+									<th scope="col" class="text-end">Actions</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="o:${orders}">
+									<td class="fw-bold text-primary">#[[${o.orderId}]]</td>
+									<td class="small text-muted">[[${o.orderDate}]]</td>
+									<td>
+										<div class="d-flex align-items-center gap-3">
+											<img th:src="@{'/img/product_img/'+${o.product.image}}" th:alt="${o.product.title}" class="rounded-2 border p-1" style="width: 48px; height: 48px; object-fit: contain;" onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60'">
+											<div>
+												<h6 class="fw-semibold mb-0">[[${o.product.title}]]</h6>
+												<span class="text-muted small">Qty: [[${o.quantity}]] | Unit: &#8377;[[${#numbers.formatDecimal(o.price, 1, 'COMMA', 2, 'POINT')}]]</span>
+											</div>
+										</div>
+									</td>
+									<td class="fw-bold text-dark">&#8377;[[${#numbers.formatDecimal(o.quantity * o.price, 1, 'COMMA', 2, 'POINT')}]]</td>
+									<td>
+										<span th:if="${o.status=='Order Received'}" class="badge-status badge-status-received">Order Received</span>
+										<span th:if="${o.status=='Product Packed' or o.status=='In Progress'}" class="badge-status badge-status-processing">[[${o.status}]]</span>
+										<span th:if="${o.status=='Delivered' or o.status=='Out for Delivery'}" class="badge-status badge-status-delivered">[[${o.status}]]</span>
+										<span th:if="${o.status=='Cancelled'}" class="badge-status badge-status-cancelled">Cancelled</span>
+									</td>
+									<td class="text-end">
+										<th:block th:if="${o.status!='Cancelled' and o.status!='Delivered'}">
+											<a th:href="@{'/user/update-status?id='+${o.id}+'&st=6'}" class="btn btn-outline-danger btn-sm" onclick="return confirm('Are you sure you want to cancel this order?');">
+												<i class="fa-solid fa-xmark me-1"></i> Cancel
+											</a>
+										</th:block>
+										<th:block th:unless="${o.status!='Cancelled' and o.status!='Delivered'}">
+											<span class="text-muted small">None</span>
+										</th:block>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				</th:block>
+
+				<!-- Empty State -->
+				<th:block th:unless="${orders != null and !orders.empty}">
+					<div class="text-center py-5">
+						<i class="fa-solid fa-box-open fs-1 text-muted mb-3"></i>
+						<h5 class="fw-bold text-dark">No Orders Placed Yet</h5>
+						<p class="text-muted small">You haven't placed any orders with us yet.</p>
+						<a href="/products" class="btn btn-primary-custom mt-2">
+							<i class="fa-solid fa-bag-shopping me-1"></i> Browse Products
+						</a>
+					</div>
+				</th:block>
+			</div>
+		</div>
+	</section>
+</body>
+</html>

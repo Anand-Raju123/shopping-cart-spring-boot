@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base::layout(~{::section})}">
+<head>
+<meta charset="UTF-8">
+<title>Order Success - EcomStore</title>
+</head>
+<body>
+	<section class="py-5 my-4">
+		<div class="container">
+			<div class="row justify-content-center">
+				<div class="col-lg-6 text-center">
+					<div class="card-modern shadow-lg p-5">
+						<div class="rounded-circle bg-success bg-opacity-10 text-success d-inline-flex p-4 fs-1 mb-3">
+							<i class="fa-solid fa-circle-check"></i>
+						</div>
+						<h2 class="fw-bold mb-2">Order Confirmed!</h2>
+						<p class="text-muted fs-5 mb-4">Thank you for your purchase. Your order has been placed successfully and will be delivered within 3-5 business days.</p>
+
+						<div class="p-3 bg-light rounded-3 mb-4 text-start border">
+							<div class="d-flex align-items-center gap-3">
+								<i class="fa-solid fa-truck-fast text-primary fs-3"></i>
+								<div>
+									<h6 class="fw-bold mb-0">Express Shipping Initialized</h6>
+									<small class="text-muted">You will receive SMS and email updates on delivery progress.</small>
+								</div>
+							</div>
+						</div>
+
+						<div class="d-flex justify-content-center gap-3">
+							<a href="/user/user-orders" class="btn btn-accent px-4 py-2.5">
+								<i class="fa-solid fa-box-archive me-1"></i> Track My Orders
+							</a>
+							<a href="/" class="btn btn-outline-custom px-4 py-2.5">
+								<i class="fa-solid fa-house me-1"></i> Return Home
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</body>
+</html>

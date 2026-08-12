@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base::layout(~{::section})}">
+<head>
+<meta charset="UTF-8">
+<title>Orders - Admin Dashboard</title>
+</head>
+<body>
+	<section class="py-5">
+		<div class="container-fluid px-lg-5">
+			<div class="d-flex justify-content-between align-items-center mb-4">
+				<div>
+					<a href="/admin/" class="text-decoration-none text-muted small fw-semibold me-2">
+						<i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+					</a>
+					<h3 class="fw-bold mb-0">Customer Orders Management</h3>
+				</div>
+			</div>
+
+			<div th:if="${session.succMsg}" class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+				<i class="fa-solid fa-circle-check me-2"></i> [[${session.succMsg}]]
+				<th:block th:text="${@commnServiceImpl.removeSessionMessage()}"></th:block>
+			</div>
+
+			<div th:if="${session.errorMsg}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+				<i class="fa-solid fa-circle-xmark me-2"></i> [[${session.errorMsg}]]
+				<th:block th:text="${@commnServiceImpl.removeSessionMessage()}"></th:block>
+			</div>
+
+			<div class="card-modern shadow-md">
+				<div class="row align-items-center mb-4">
+					<div class="col-md-5">
+						<form action="/admin/search-order" method="get">
+							<div class="input-group">
+								<input type="text" class="form-control form-control-modern" name="orderId" placeholder="Search by Order ID..." th:value="${param.orderId}">
+								<button class="btn btn-primary px-3" type="submit"><i class="fa-solid fa-magnifying-glass me-1"></i> Search</button>
+							</div>
+						</form>
+					</div>
+				</div>
+
+				<div class="table-responsive">
+					<table class="table table-modern">
+						<thead>
+							<tr>
+								<th scope="col">Order ID</th>
+								<th scope="col">Customer Info</th>
+								<th scope="col">Date</th>
+								<th scope="col">Product Details</th>
+								<th scope="col">Total Price</th>
+								<th scope="col">Status</th>
+								<th scope="col" style="min-width: 200px;">Update Status</th>
+							</tr>
+						</thead>
+						<tbody>
+							<th:block th:if="${srch}">
+								<th:block th:if="${orderDtls!=null}">
+									<tr>
+										<td class="fw-bold text-primary">#[[${orderDtls.orderId}]]</td>
+										<td>
+											<strong class="text-dark">[[${orderDtls.orderAddress.firstName+' '+orderDtls.orderAddress.lastName}]]</strong><br>
+											<span class="text-muted small"><i class="fa-regular fa-envelope me-1"></i>[[${orderDtls.orderAddress.email}]]</span><br>
+											<span class="text-muted small"><i class="fa-solid fa-phone me-1"></i>[[${orderDtls.orderAddress.mobileNo}]]</span>
+										</td>
+										<td class="small text-muted">[[${orderDtls.orderDate}]]</td>
+										<td>
+											<h6 class="fw-bold mb-1">[[${orderDtls.product.title}]]</h6>
+											<span class="text-muted small">Qty: [[${orderDtls.quantity}]]</span>
+										</td>
+										<td class="fw-extrabold text-dark">&#8377;[[${#numbers.formatDecimal(orderDtls.quantity * orderDtls.price, 1, 'COMMA', 2, 'POINT')}]]</td>
+										<td>
+											<span th:if="${orderDtls.status=='Order Received'}" class="badge-status badge-status-received">Order Received</span>
+											<span th:if="${orderDtls.status=='Product Packed' or orderDtls.status=='In Progress'}" class="badge-status badge-status-processing">[[${orderDtls.status}]]</span>
+											<span th:if="${orderDtls.status=='Delivered' or orderDtls.status=='Out for Delivery'}" class="badge-status badge-status-delivered">[[${orderDtls.status}]]</span>
+											<span th:if="${orderDtls.status=='Cancelled'}" class="badge-status badge-status-cancelled">Cancelled</span>
+										</td>
+										<td>
+											<form action="/admin/update-order-status" method="post" class="d-flex gap-1">
+												<input th:value="${orderDtls.id}" name="id" type="hidden">
+												<select class="form-select form-select-sm border-secondary" name="st">
+													<option value="1">In Progress</option>
+													<option value="2">Order Received</option>
+													<option value="3">Product Packed</option>
+													<option value="4">Out for Delivery</option>
+													<option value="5">Delivered</option>
+													<option value="6">Cancelled</option>
+												</select>
+												<button th:disabled="${orderDtls.status=='Cancelled' or orderDtls.status=='Delivered'}" class="btn btn-primary btn-sm px-2">Update</button>
+											</form>
+										</td>
+									</tr>
+								</th:block>
+								<th:block th:unless="${orderDtls!=null}">
+									<tr><td colspan="7" class="text-center text-danger py-4 fs-5">No Order Matches Order ID</td></tr>
+								</th:block>
+							</th:block>
+
+							<th:block th:unless="${srch}">
+								<tr th:each="o:${orders}">
+									<td class="fw-bold text-primary">#[[${o.orderId}]]</td>
+									<td>
+										<strong class="text-dark">[[${o.orderAddress.firstName+' '+o.orderAddress.lastName}]]</strong><br>
+										<span class="text-muted small"><i class="fa-regular fa-envelope me-1"></i>[[${o.orderAddress.email}]]</span><br>
+										<span class="text-muted small"><i class="fa-solid fa-phone me-1"></i>[[${o.orderAddress.mobileNo}]]</span>
+									</td>
+									<td class="small text-muted">[[${o.orderDate}]]</td>
+									<td>
+										<h6 class="fw-bold mb-1">[[${o.product.title}]]</h6>
+										<span class="text-muted small">Qty: [[${o.quantity}]]</span>
+									</td>
+									<td class="fw-extrabold text-dark">&#8377;[[${#numbers.formatDecimal(o.quantity * o.price, 1, 'COMMA', 2, 'POINT')}]]</td>
+									<td>
+										<span th:if="${o.status=='Order Received'}" class="badge-status badge-status-received">Order Received</span>
+										<span th:if="${o.status=='Product Packed' or o.status=='In Progress'}" class="badge-status badge-status-processing">[[${o.status}]]</span>
+										<span th:if="${o.status=='Delivered' or o.status=='Out for Delivery'}" class="badge-status badge-status-delivered">[[${o.status}]]</span>
+										<span th:if="${o.status=='Cancelled'}" class="badge-status badge-status-cancelled">Cancelled</span>
+									</td>
+									<td>
+										<form action="/admin/update-order-status" method="post" class="d-flex gap-1">
+											<input th:value="${o.id}" name="id" type="hidden">
+											<select class="form-select form-select-sm border-secondary" name="st">
+												<option value="1" th:selected="${o.status=='In Progress'}">In Progress</option>
+												<option value="2" th:selected="${o.status=='Order Received'}">Order Received</option>
+												<option value="3" th:selected="${o.status=='Product Packed'}">Product Packed</option>
+												<option value="4" th:selected="${o.status=='Out for Delivery'}">Out for Delivery</option>
+												<option value="5" th:selected="${o.status=='Delivered'}">Delivered</option>
+												<option value="6" th:selected="${o.status=='Cancelled'}">Cancelled</option>
+											</select>
+											<button th:disabled="${o.status=='Cancelled' or o.status=='Delivered'}" class="btn btn-primary btn-sm px-2">Update</button>
+										</form>
+									</td>
+								</tr>
+							</th:block>
+						</tbody>
+					</table>
+				</div>
+
+				<div class="d-flex justify-content-between align-items-center mt-3 pt-3 border-top" th:if="${!srch and totalPages > 0}">
+					<div class="text-muted small">Total Orders: [[${totalElements}]]</div>
+					<nav aria-label="Pagination">
+						<ul class="pagination pagination-sm mb-0">
+							<li class="page-item" th:classappend="${isFirst} ? 'disabled':''">
+								<a class="page-link" th:href="@{'/admin/orders?pageNo='+${pageNo-1}}">&laquo;</a>
+							</li>
+							<li th:each="i:${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${pageNo+1==i}?'active':''">
+								<a class="page-link" th:href="@{'/admin/orders?pageNo='+${i-1}}">[[${i}]]</a>
+							</li>
+							<li class="page-item" th:classappend="${isLast} ? 'disabled':''">
+								<a class="page-link" th:href="@{'/admin/orders?pageNo='+${pageNo+1}}">&raquo;</a>
+							</li>
+						</ul>
+					</nav>
+				</div>
+			</div>
+		</div>
+	</section>
+</body>
+</html>

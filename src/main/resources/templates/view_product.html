@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base::layout(~{::section})}">
+<head>
+<meta charset="UTF-8">
+<title>Product Details - EcomStore</title>
+</head>
+<body>
+	<section class="py-4">
+		<div class="container">
+			<!-- Breadcrumb -->
+			<nav aria-label="breadcrumb" class="mb-4">
+				<ol class="breadcrumb mb-0">
+					<li class="breadcrumb-item"><a href="/" class="text-decoration-none text-muted">Home</a></li>
+					<li class="breadcrumb-item"><a href="/products" class="text-decoration-none text-muted">Catalog</a></li>
+					<li class="breadcrumb-item active text-dark" aria-current="page">[[${product.title}]]</li>
+				</ol>
+			</nav>
+
+			<!-- Alerts -->
+			<div th:if="${session.succMsg}" class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+				<i class="fa-solid fa-circle-check me-2"></i> [[${session.succMsg}]]
+				<th:block th:text="${@commnServiceImpl.removeSessionMessage()}"></th:block>
+			</div>
+
+			<div th:if="${session.errorMsg}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-4" role="alert">
+				<i class="fa-solid fa-circle-xmark me-2"></i> [[${session.errorMsg}]]
+				<th:block th:text="${@commnServiceImpl.removeSessionMessage()}"></th:block>
+			</div>
+
+			<div class="card-custom p-4 p-lg-5">
+				<div class="row g-4 align-items-center">
+					<!-- Product Image -->
+					<div class="col-lg-6">
+						<div class="border rounded-3 p-4 text-center bg-white position-relative" style="min-height: 360px; display: flex; align-items: center; justify-content: center;">
+							<span th:if="${product.discount > 0}" class="badge-discount" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">
+								-[[${product.discount}]]% OFF
+							</span>
+							<img th:src="@{'/img/product_img/'+${product.image}}" th:alt="${product.title}" class="img-fluid" style="max-height: 320px; object-fit: contain;" onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60'">
+						</div>
+					</div>
+
+					<!-- Product Info -->
+					<div class="col-lg-6">
+						<div class="text-uppercase text-muted fw-bold small mb-1 tracking-wider">[[${product.category}]]</div>
+						<h2 class="fw-bold text-dark mb-3">[[${product.title}]]</h2>
+
+						<div class="d-flex align-items-baseline gap-3 mb-3">
+							<span class="fs-2 fw-bold text-dark">&#8377;[[${#numbers.formatDecimal(product.discountPrice, 1, 'COMMA', 2, 'POINT')}]]</span>
+							<span th:if="${product.discount > 0}" class="fs-6 text-muted text-decoration-line-through">&#8377;[[${#numbers.formatDecimal(product.price, 1, 'COMMA', 2, 'POINT')}]]</span>
+							<span th:if="${product.discount > 0}" class="badge bg-success bg-opacity-10 text-success fw-bold px-2.5 py-1">Save [[${product.discount}]]%</span>
+						</div>
+
+						<p class="text-secondary mb-4 leading-relaxed">[[${product.description}]]</p>
+
+						<!-- Inventory & Details Box -->
+						<div class="p-3 bg-light rounded-3 border mb-4">
+							<div class="row g-2 small">
+								<div class="col-6">
+									<strong class="text-dark"><i class="fa-solid fa-boxes-stacked text-primary me-1"></i> Stock Status:</strong><br>
+									<span th:if="${product.stock > 0}" class="text-success fw-semibold">In Stock ([[${product.stock}]] available)</span>
+									<span th:unless="${product.stock > 0}" class="text-danger fw-semibold">Out of Stock</span>
+								</div>
+								<div class="col-6">
+									<strong class="text-dark"><i class="fa-solid fa-truck-fast text-primary me-1"></i> Shipping:</strong><br>
+									<span class="text-muted">Standard Express (2-4 Days)</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Action Buttons -->
+						<div class="d-flex flex-wrap gap-2">
+							<th:block th:if="${product.stock > 0}">
+								<th:block th:if="${user==null}">
+									<a href="/signin" class="btn btn-primary-custom px-4 py-2.5">
+										<i class="fa-solid fa-cart-plus me-2"></i> Sign In to Add to Cart
+									</a>
+								</th:block>
+								<th:block th:if="${user!=null}">
+									<a th:href="@{'/user/addCart?pid='+${product.id}+'&uid='+${user.id}}" class="btn btn-primary-custom px-4 py-2.5">
+										<i class="fa-solid fa-cart-plus me-2"></i> Add to Cart
+									</a>
+								</th:block>
+							</th:block>
+							<th:block th:unless="${product.stock > 0}">
+								<button disabled class="btn btn-outline-secondary px-4 py-2.5">
+									<i class="fa-solid fa-ban me-2"></i> Out of Stock
+								</button>
+							</th:block>
+
+							<a href="/products" class="btn btn-outline-custom px-4 py-2.5">
+								Back to Catalog
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+</body>
+</html>

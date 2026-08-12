@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base::layout(~{::section})}">
+<head>
+<meta charset="UTF-8">
+<title>Shopping Cart - EcomStore</title>
+</head>
+<body>
+	<section class="py-4">
+		<div class="container">
+			<div class="card-custom p-4">
+				<div class="d-flex justify-content-between align-items-center pb-3 mb-4 border-bottom">
+					<div>
+						<h3 class="fw-bold text-dark mb-0"><i class="fa-solid fa-cart-shopping me-2 text-primary"></i> Shopping Cart</h3>
+						<span class="text-muted small">Manage items in your shopping bag</span>
+					</div>
+					<span class="badge bg-primary bg-opacity-10 text-primary fw-semibold px-3 py-1.5 rounded-pill">
+						[[${carts!=null ? carts.size() : 0}]] Items
+					</span>
+				</div>
+
+				<div th:if="${session.succMsg}" class="alert alert-success alert-dismissible fade show rounded-3 mb-3" role="alert">
+					<i class="fa-solid fa-circle-check me-2"></i> [[${session.succMsg}]]
+					<th:block th:text="${@commnServiceImpl.removeSessionMessage()}"></th:block>
+				</div>
+
+				<div th:if="${session.errorMsg}" class="alert alert-danger alert-dismissible fade show rounded-3 mb-3" role="alert">
+					<i class="fa-solid fa-circle-xmark me-2"></i> [[${session.errorMsg}]]
+					<th:block th:text="${@commnServiceImpl.removeSessionMessage()}"></th:block>
+				</div>
+
+				<th:block th:if="${carts != null and !carts.empty}">
+					<div class="table-responsive mb-4">
+						<table class="table table-custom align-middle">
+							<thead>
+								<tr>
+									<th scope="col">#</th>
+									<th scope="col">Product Item</th>
+									<th scope="col">Unit Price</th>
+									<th scope="col" class="text-center">Quantity</th>
+									<th scope="col" class="text-end">Total Price</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr th:each="cart,c:${carts}">
+									<td class="fw-bold text-muted">[[${c.count}]]</td>
+									<td>
+										<div class="d-flex align-items-center gap-3">
+											<img th:src="@{'/img/product_img/'+${cart.product.image}}" th:alt="${cart.product.title}" class="rounded-2 border p-1" style="width: 55px; height: 55px; object-fit: contain;" onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60'">
+											<div>
+												<h6 class="fw-semibold mb-0"><a th:href="@{'/product/'+${cart.product.id}}" class="text-dark text-decoration-none">[[${cart.product.title}]]</a></h6>
+												<span class="text-muted small">Category: [[${cart.product.category}]] | Stock: [[${cart.product.stock}]]</span>
+											</div>
+										</div>
+									</td>
+									<td class="fw-semibold">&#8377;[[${#numbers.formatDecimal(cart.product.discountPrice, 1, 'COMMA', 2, 'POINT')}]]</td>
+									<td class="text-center">
+										<div class="d-inline-flex align-items-center border rounded bg-light gap-2 px-2 py-1">
+											<a th:href="@{'/user/cartQuantityUpdate?sy=de&cid='+${cart.id}}" class="text-dark text-decoration-none px-1">
+												<i class="fa-solid fa-minus small"></i>
+											</a>
+											<span class="fw-bold px-2">[[${cart.quantity}]]</span>
+											<a th:href="@{'/user/cartQuantityUpdate?sy=in&cid='+${cart.id}}" class="text-dark text-decoration-none px-1" th:classappend="${cart.quantity >= cart.product.stock} ? 'pe-none opacity-50':''">
+												<i class="fa-solid fa-plus small"></i>
+											</a>
+										</div>
+									</td>
+									<td class="text-end fw-bold text-dark">&#8377;[[${#numbers.formatDecimal(cart.totalPrice, 1, 'COMMA', 2, 'POINT')}]]</td>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+
+					<div class="row align-items-center pt-3 border-top g-3">
+						<div class="col-md-6">
+							<a href="/products" class="btn btn-outline-custom">
+								<i class="fa-solid fa-arrow-left me-1"></i> Continue Shopping
+							</a>
+						</div>
+						<div class="col-md-6 text-md-end">
+							<div class="d-inline-block bg-light p-3 rounded border mb-3 me-md-2" style="min-width: 260px;">
+								<span class="text-muted me-3">Subtotal Order Amount:</span>
+								<span class="fs-4 fw-bold text-dark">&#8377;[[${#numbers.formatDecimal(totalOrderPrice, 1, 'COMMA', 2, 'POINT')}]]</span>
+							</div>
+							<div>
+								<a href="/user/orders" class="btn btn-primary-custom px-4 py-2.5">
+									Proceed to Checkout <i class="fa-solid fa-arrow-right ms-2"></i>
+								</a>
+							</div>
+						</div>
+					</div>
+				</th:block>
+
+				<!-- Empty State -->
+				<th:block th:unless="${carts != null and !carts.empty}">
+					<div class="text-center py-5">
+						<i class="fa-solid fa-cart-flatbed fs-1 text-muted mb-3"></i>
+						<h5 class="fw-bold text-dark">Your Cart is Currently Empty</h5>
+						<p class="text-muted small">You haven't added any products to your shopping cart yet.</p>
+						<a href="/products" class="btn btn-primary-custom mt-2">
+							<i class="fa-solid fa-bag-shopping me-1"></i> Start Shopping
+						</a>
+					</div>
+				</th:block>
+			</div>
+		</div>
+	</section>
+</body>
+</html>

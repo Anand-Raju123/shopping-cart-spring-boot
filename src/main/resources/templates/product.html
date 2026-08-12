@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{base::layout(~{::section})}">
+<head>
+<meta charset="UTF-8">
+<title>Products - EcomStore</title>
+</head>
+<body>
+	<section class="py-4">
+		<!-- Header & Search -->
+		<div class="container mb-4">
+			<div class="card-custom p-4">
+				<div class="row align-items-center g-3">
+					<div class="col-md-6">
+						<h3 class="fw-bold text-dark mb-1">Product Catalog</h3>
+						<p class="text-muted small mb-0" th:if="${paramValue == null or paramValue == ''}">Browsing all items</p>
+						<p class="text-muted small mb-0" th:if="${paramValue != null and paramValue != ''}">Category: <strong class="text-dark">[[${paramValue}]]</strong></p>
+					</div>
+					<div class="col-md-6">
+						<form action="/products" method="get">
+							<input type="hidden" name="category" th:value="${paramValue}">
+							<input type="hidden" name="sort" th:value="${sort}">
+							<div class="input-group">
+								<input type="text" class="form-control form-control-custom" name="ch" placeholder="Search by name or keyword..." th:value="${ch}">
+								<button class="btn btn-primary-custom" type="submit"><i class="fa-solid fa-magnifying-glass me-1"></i> Search</button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Main Catalog Section -->
+		<div class="container">
+			<div class="row g-4">
+				<!-- Category & Sort Filter Sidebar -->
+				<div class="col-lg-3 col-md-4">
+					<!-- Category Filter -->
+					<div class="card-custom p-3 mb-4">
+						<h6 class="fw-bold text-dark text-uppercase small tracking-wider mb-3">
+							<i class="fa-solid fa-layer-group me-1 text-primary"></i> Categories
+						</h6>
+						<div class="list-group list-group-flush">
+							<a href="/products" th:classappend="${paramValue == null or paramValue == ''} ? 'fw-bold text-primary active-category':''" class="list-group-item list-group-item-action border-0 px-2 py-2 small d-flex justify-content-between align-items-center">
+								<span><i class="fa-solid fa-border-all me-2 text-secondary"></i> All Products</span>
+							</a>
+							<a th:each="c:${categories}" th:href="@{'/products?category='+${c.name}+'&sort='+${sort}+'&ch='+${ch}}" th:classappend="${paramValue == c.name} ? 'fw-bold text-primary active-category':''" class="list-group-item list-group-item-action border-0 px-2 py-2 small d-flex justify-content-between align-items-center">
+								<span><i class="fa-solid fa-tag me-2 text-secondary"></i> [[${c.name}]]</span>
+							</a>
+						</div>
+					</div>
+
+					<!-- Sort Filter Box -->
+					<div class="card-custom p-3">
+						<h6 class="fw-bold text-dark text-uppercase small tracking-wider mb-3">
+							<i class="fa-solid fa-arrow-down-wide-short me-1 text-primary"></i> Sort By
+						</h6>
+						<form action="/products" method="get">
+							<input type="hidden" name="category" th:value="${paramValue}">
+							<input type="hidden" name="ch" th:value="${ch}">
+							<select name="sort" class="form-select form-select-custom mb-3" onchange="this.form.submit()">
+								<option value="" th:selected="${sort == null or sort == ''}">Default Order</option>
+								<option value="price_asc" th:selected="${sort == 'price_asc'}">Price: Low to High</option>
+								<option value="price_desc" th:selected="${sort == 'price_desc'}">Price: High to Low</option>
+								<option value="discount" th:selected="${sort == 'discount'}">Highest Discount</option>
+								<option value="newest" th:selected="${sort == 'newest'}">Newest Arrivals</option>
+							</select>
+						</form>
+					</div>
+				</div>
+
+				<!-- Products Grid Column -->
+				<div class="col-lg-9 col-md-8">
+					<th:block th:if="${productsSize > 0}">
+						<div class="row g-3">
+							<div class="col-xl-4 col-md-6" th:each="p:${products}">
+								<div class="card-custom product-card">
+									<div class="img-container">
+										<span th:if="${p.discount > 0}" class="badge-discount">[[${p.discount}]]% OFF</span>
+										<span th:if="${p.stock <= 0}" class="badge-outstock">Out of Stock</span>
+										<img th:src="@{'/img/product_img/'+${p.image}}" th:alt="${p.title}" onerror="this.src='https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500&auto=format&fit=crop&q=60'">
+									</div>
+
+									<div class="card-body">
+										<div class="product-category">[[${p.category}]]</div>
+										<a th:href="@{'/product/'+${p.id}}" class="text-decoration-none text-dark">
+											<h6 class="product-title">[[${p.title}]]</h6>
+										</a>
+
+										<div class="price-row mt-auto">
+											<span class="price-current">&#8377;[[${#numbers.formatDecimal(p.discountPrice, 1, 'COMMA', 2, 'POINT')}]]</span>
+											<span th:if="${p.discount > 0}" class="price-original">&#8377;[[${#numbers.formatDecimal(p.price, 1, 'COMMA', 2, 'POINT')}]]</span>
+										</div>
+
+										<div class="mt-3">
+											<th:block th:if="${p.stock > 0}">
+												<th:block th:if="${user==null}">
+													<a href="/signin" class="btn btn-outline-custom btn-sm w-100">
+														<i class="fa-solid fa-cart-plus me-1"></i> Add to Cart
+													</a>
+												</th:block>
+												<th:block th:if="${user!=null}">
+													<a th:href="@{'/user/addCart?pid='+${p.id}+'&uid='+${user.id}}" class="btn btn-primary-custom btn-sm w-100">
+														<i class="fa-solid fa-cart-plus me-1"></i> Add to Cart
+													</a>
+												</th:block>
+											</th:block>
+											<th:block th:unless="${p.stock > 0}">
+												<button class="btn btn-outline-secondary btn-sm w-100" disabled>Out of Stock</button>
+											</th:block>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<!-- Pagination controls -->
+						<div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top" th:if="${totalPages > 0}">
+							<div class="text-muted small">
+								Showing <strong>[[${productsSize}]]</strong> of <strong>[[${totalElements}]]</strong> items
+							</div>
+							<nav aria-label="Page navigation">
+								<ul class="pagination pagination-sm mb-0">
+									<li class="page-item" th:classappend="${isFirst} ? 'disabled':''">
+										<a class="page-link" th:href="@{'/products?pageNo='+${pageNo-1}+'&category='+${paramValue}+'&sort='+${sort}+'&ch='+${ch}}">&laquo; Prev</a>
+									</li>
+									<li th:each="i:${#numbers.sequence(1, totalPages)}" class="page-item" th:classappend="${pageNo+1==i}?'active':''">
+										<a class="page-link" th:href="@{'/products?pageNo='+${i-1}+'&category='+${paramValue}+'&sort='+${sort}+'&ch='+${ch}}">[[${i}]]</a>
+									</li>
+									<li class="page-item" th:classappend="${isLast} ? 'disabled':''">
+										<a class="page-link" th:href="@{'/products?pageNo='+${pageNo+1}+'&category='+${paramValue}+'&sort='+${sort}+'&ch='+${ch}}">Next &raquo;</a>
+									</li>
+								</ul>
+							</nav>
+						</div>
+					</th:block>
+
+					<!-- Empty State -->
+					<th:block th:unless="${productsSize > 0}">
+						<div class="card-custom p-5 text-center">
+							<i class="fa-solid fa-box-open fs-1 text-muted mb-3"></i>
+							<h5 class="fw-bold text-dark">No Products Found</h5>
+							<p class="text-muted small">There are no items matching your criteria.</p>
+							<div>
+								<a href="/products" class="btn btn-primary-custom btn-sm"><i class="fa-solid fa-rotate-left me-1"></i> Clear Filters</a>
+							</div>
+						</div>
+					</th:block>
+				</div>
+			</div>
+		</div>
+	</section>
+</body>
+</html>
